@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slunk - Encontre Seguidores</title>
+
+<!-- ESTILO -->
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        background: radial-gradient(circle at top, #1a002b, #000);
+        color: white;
+        overflow-x: hidden;
+    }
+
+    header {
+        padding: 20px;
+        text-align: center;
+        font-size: 2.3rem;
+        font-weight: 700;
+        color: #8f3fff;
+        text-shadow: 0 0 15px #8f3fff;
+        letter-spacing: 2px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background: rgba(30, 0, 55, 0.7);
+        backdrop-filter: blur(10px);
+        border: 2px solid #8f3fff;
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 0 20px #8f3fff55;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 30px #8f3fff;
+    }
+
+    .card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid #8f3fff;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+
+    .username {
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    .follow-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        border-radius: 50px;
+        background: #8f3fff;
+        border: none;
+        cursor: pointer;
+        color: white;
+        font-size: 1.1rem;
+        transition: 0.3s;
+        box-shadow: 0 0 15px #8f3fff;
+    }
+
+    .follow-btn:hover {
+        background: #b66bff;
+        box-shadow: 0 0 25px #b66bff;
+    }
+
+    footer {
+        margin-top: 30px;
+        text-align: center;
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+</style>
+
+</head>
+<body>
+
+<header>SLUNK</header>
+
+<div class="container" id="userContainer">
+    <!-- CARDS SERÃO INSERIDOS AQUI VIA JS -->
+</div>
+
+<footer>Slunk © 2025 — Cresça no Instagram de forma legítima</footer>
+
+
+<!-- SCRIPT DO SUPABASE + LÓGICA DO SLUNK -->
+<script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // CONFIGURAÇÕES
+    const supabaseUrl = "https://vcwccnmyzjxwhxoalcuz.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjd2Njbm15emp4d2h4b2FsY3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNzA2NDgsImV4cCI6MjA3ODc0NjY0OH0.ppmB5Kaaig9Gs8oLxZHSYy5-sDDSsg0DKo3q89Y4Ofk";
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const container = document.getElementById("userContainer");
+
+    // 🔥 BUSCAR USUÁRIOS DO SUPABASE
+    async function carregarUsuarios() {
+        const { data, error } = await supabase
+            .from("slunk_users")
+            .select("*")
+            .eq("banned", false);
+
+        if (error) {
+            console.log(error);
+            return;
+        }
+
+        data.forEach(user => {
+            criarCard(user);
+        });
+    }
+
+    // 🔥 CRIA CARD NO HTML
+    function criarCard(user) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <img src="${user.foto}" alt="Foto de ${user.username}">
+            <div class="username">@${user.username}</div>
+            <button class="follow-btn" onclick="window.open('${user.instagram}', '_blank')">Seguir</button>
+        `;
+
+        container.appendChild(card);
+    }
+
+    // 🔥 COMEÇA CARREGANDO OS USUÁRIOS
+    carregarUsuarios();
+</script>
+
+</body>
+</html>
