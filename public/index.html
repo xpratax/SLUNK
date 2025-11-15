@@ -1,155 +1,335 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Slunk - Encontre Seguidores</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Slunk — Encontre Seguidores</title>
 
-<!-- ESTILO -->
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Poppins', sans-serif;
-        background: radial-gradient(circle at top, #1a002b, #000);
-        color: white;
-        overflow-x: hidden;
-    }
+  :root{
+    --bg:#05030a;
+    --card:#0b0b12;
+    --accent1:#00ffe1;
+    --accent2:#ff2d95;
+    --neon:#8f3fff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,255,225,0.03), transparent 10%),
+                radial-gradient(900px 400px at 90% 90%, rgba(255,45,149,0.03), transparent 15%),
+                var(--bg);
+    color:#e6eef8;
+    -webkit-font-smoothing:antialiased;
+    padding:28px;
+  }
 
-    header {
-        padding: 20px;
-        text-align: center;
-        font-size: 2.3rem;
-        font-weight: 700;
-        color: #8f3fff;
-        text-shadow: 0 0 15px #8f3fff;
-        letter-spacing: 2px;
-    }
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto 20px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:700;color:#04050a;font-size:20px}
+  h1{margin:0;font-size:20px}
+  .muted{opacity:0.8;font-size:13px;color:#cfdfff}
 
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-    }
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:18px}
 
-    .card {
-        background: rgba(30, 0, 55, 0.7);
-        backdrop-filter: blur(10px);
-        border: 2px solid #8f3fff;
-        border-radius: 20px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 0 20px #8f3fff55;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
+  /* Controls */
+  .controls{display:flex;gap:12px;align-items:center}
+  .btn{background:linear-gradient(90deg,rgba(255,255,255,0.02),transparent);border:1px solid rgba(255,255,255,0.04);padding:10px 14px;border-radius:10px;color:var(--accent1);cursor:pointer;font-weight:600}
+  .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041018}
 
-    .card:hover {
-        transform: scale(1.03);
-        box-shadow: 0 0 30px #8f3fff;
-    }
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
 
-    .card img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 3px solid #8f3fff;
-        object-fit: cover;
-        margin-bottom: 10px;
-    }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+    border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;align-items:center;gap:10px;
+    position:relative;overflow:hidden;
+  }
+  .avatar{
+    width:120px;height:120px;border-radius:999px;background:linear-gradient(120deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));
+    display:grid;place-items:center;overflow:hidden;border:3px solid rgba(143,63,255,0.18)
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+  .username{font-weight:700}
+  .meta{color:#bcd7ff;font-size:13px}
+  .follow{margin-top:8px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .follow.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041018}
+  .follow.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent2)}
 
-    .username {
-        font-size: 1.4rem;
-        font-weight: 600;
-    }
+  /* modal */
+  .modal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,2,6,0.6);visibility:hidden;opacity:0;transition:opacity .18s;z-index:60}
+  .modal.open{visibility:visible;opacity:1}
+  .modal .content{width:min(760px,96%);background:linear-gradient(180deg,#06060b,#04040a);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+  label{font-size:13px;color:#cbd7ff}
+  input[type="text"], input[type="url"], input[type="file"]{
+    padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit
+  }
+  .row{display:flex;gap:8px}
+  .note{font-size:13px;color:#9fb7ff;margin-top:8px}
 
-    .follow-btn {
-        margin-top: 10px;
-        padding: 10px 20px;
-        border-radius: 50px;
-        background: #8f3fff;
-        border: none;
-        cursor: pointer;
-        color: white;
-        font-size: 1.1rem;
-        transition: 0.3s;
-        box-shadow: 0 0 15px #8f3fff;
-    }
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
 
-    .follow-btn:hover {
-        background: #b66bff;
-        box-shadow: 0 0 25px #b66bff;
-    }
+  footer{max-width:1100px;margin:18px auto 0;padding-top:12px;text-align:center;color:#9fb7ff;opacity:0.8}
 
-    footer {
-        margin-top: 30px;
-        text-align: center;
-        color: #888;
-        font-size: 0.9rem;
-    }
-
+  @media (max-width:720px){header{flex-direction:column;align-items:flex-start;gap:12px}}
 </style>
-
 </head>
 <body>
 
-<header>SLUNK</header>
+<header>
+  <div class="brand">
+    <div class="logo">S</div>
+    <div>
+      <h1>Slunk</h1>
+      <div class="muted">Conecte seguidores — Siga, curta e troque</div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn" id="refreshBtn">Atualizar</button>
+    <button class="btn primary" id="openCreate">Criar Perfil</button>
+  </div>
+</header>
 
-<div class="container" id="userContainer">
-    <!-- CARDS SERÃO INSERIDOS AQUI VIA JS -->
+<main class="wrap">
+  <section class="grid" id="grid"></section>
+</main>
+
+<footer>Slunk © 2025 — Feito com neon e café ☕</footer>
+
+<!-- modal criar perfil -->
+<div class="modal" id="modal">
+  <div class="content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="topbar">
+      <h3 id="modalTitle" style="margin:0">Criar Perfil no Slunk</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="closeModal">Fechar</button>
+      </div>
+    </div>
+
+    <form id="createForm">
+      <div class="field">
+        <label for="username">Nome público (ex: joaofilmes)</label>
+        <input id="username" name="username" type="text" placeholder="joaofilmes" required />
+      </div>
+
+      <div class="field">
+        <label for="instagram">Link do Instagram (https://instagram.com/xxxxx)</label>
+        <input id="instagram" name="instagram" type="url" placeholder="https://instagram.com/seu_perfil" required />
+      </div>
+
+      <div class="field">
+        <label for="foto">Foto de perfil (upload)</label>
+        <input id="foto" name="foto" type="file" accept="image/*" />
+        <div class="note">A imagem será enviada para o bucket <strong>avatars</strong> no Supabase Storage.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn primary" type="submit" id="submitBtn">Criar Perfil</button>
+        <button class="btn" type="button" id="cancelBtn">Cancelar</button>
+        <div id="status" style="align-self:center;color:#9fb7ff"></div>
+      </div>
+    </form>
+
+    <div style="margin-top:12px;color:#9fb7ff;font-size:13px">
+      Dica: Se quiser, adicione também a foto como URL no campo 'instagram' (não recomendado). O upload garante armazenamento centralizado.
+    </div>
+  </div>
 </div>
 
-<footer>Slunk © 2025 — Cresça no Instagram de forma legítima</footer>
-
-
-<!-- SCRIPT DO SUPABASE + LÓGICA DO SLUNK -->
+<!-- SCRIPT -->
 <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    // CONFIGURAÇÕES
-    const supabaseUrl = "https://vcwccnmyzjxwhxoalcuz.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjd2Njbm15emp4d2h4b2FsY3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNzA2NDgsImV4cCI6MjA3ODc0NjY0OH0.ppmB5Kaaig9Gs8oLxZHSYy5-sDDSsg0DKo3q89Y4Ofk";
+  // ======= CONFIGURA AQUI (já vem preenchido do que você enviou) =======
+  const SUPABASE_URL = "https://vcwccnmyzjxwhxoalcuz.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjd2Njbm15emp4d2h4b2FsY3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNzA2NDgsImV4cCI6MjA3ODc0NjY0OH0.ppmB5Kaaig9Gs8oLxZHSYy5-sDDSsg0DKo3q89Y4Ofk";
+  // ===================================================================
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const grid = document.getElementById('grid');
+  const openCreate = document.getElementById('openCreate');
+  const modal = document.getElementById('modal');
+  const closeModal = document.getElementById('closeModal');
+  const createForm = document.getElementById('createForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const statusEl = document.getElementById('status');
+  const refreshBtn = document.getElementById('refreshBtn');
 
-    const container = document.getElementById("userContainer");
+  // show/hide modal
+  openCreate.addEventListener('click', ()=> modal.classList.add('open'));
+  closeModal.addEventListener('click', ()=> modal.classList.remove('open'));
+  cancelBtn.addEventListener('click', ()=> modal.classList.remove('open'));
 
-    // 🔥 BUSCAR USUÁRIOS DO SUPABASE
-    async function carregarUsuarios() {
-        const { data, error } = await supabase
-            .from("slunk_users")
-            .select("*")
-            .eq("banned", false);
+  // carregar usuários (não banidos)
+  async function loadUsers(){
+    grid.innerHTML = '';
+    const { data, error } = await supabase
+      .from('slunk_users')
+      .select('*')
+      .eq('banned', false)
+      .order('created_at', { ascending: false });
 
-        if (error) {
-            console.log(error);
-            return;
-        }
-
-        data.forEach(user => {
-            criarCard(user);
-        });
+    if(error){
+      console.error('Erro ao carregar usuários:', error);
+      grid.innerHTML = `<div style="padding:20px;color:#f88">Erro ao carregar usuários</div>`;
+      return;
     }
 
-    // 🔥 CRIA CARD NO HTML
-    function criarCard(user) {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <img src="${user.foto}" alt="Foto de ${user.username}">
-            <div class="username">@${user.username}</div>
-            <button class="follow-btn" onclick="window.open('${user.instagram}', '_blank')">Seguir</button>
-        `;
-
-        container.appendChild(card);
+    if(!data || data.length === 0){
+      grid.innerHTML = `<div style="padding:20px;color:#9fb7ff">Nenhum perfil encontrado — crie o primeiro!</div>`;
+      return;
     }
 
-    // 🔥 COMEÇA CARREGANDO OS USUÁRIOS
-    carregarUsuarios();
+    data.forEach(u => {
+      const el = document.createElement('article');
+      el.className = 'card';
+      const foto = u.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=8f3fff&color=fff&size=256`;
+      el.innerHTML = `
+        <div class="avatar"><img src="${foto}" alt="${u.username}"></div>
+        <div class="username">@${u.username}</div>
+        <div class="meta">${(u.followers !== undefined) ? `${u.followers} seguidores • ` : ''}${u.instagram.replace(/^https?:\\/\\//,'')}</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="follow primary" data-ig="${u.instagram}">Visitar</button>
+        </div>
+      `;
+      grid.appendChild(el);
+    });
+  }
+
+  // clique visitar / seguir
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-ig]');
+    if(!btn) return;
+    const ig = btn.dataset.ig;
+    window.open(ig, '_blank');
+  });
+
+  refreshBtn.addEventListener('click', ()=> loadUsers());
+
+  // helper: upload file to storage avatars bucket
+  async function uploadAvatar(file){
+    if(!file) return null;
+    // cria nome único
+    const ext = file.name.split('.').pop();
+    const filename = `avatars/${Date.now()}-${Math.random().toString(36).slice(2,9)}.${ext}`;
+
+    // Faz upload
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+    if(error){
+      console.error('Erro upload:', error);
+      throw error;
+    }
+
+    // Pega URL pública (garanta que bucket 'avatars' seja público ou use createSignedUrl)
+    const { publicURL, error: urlErr } = supabase
+      .storage
+      .from('avatars')
+      .getPublicUrl(filename);
+
+    if(urlErr){
+      console.error('Erro ao obter publicUrl:', urlErr);
+      throw urlErr;
+    }
+
+    return publicURL;
+  }
+
+  // form submit
+  createForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    statusEl.textContent = 'Enviando...';
+    submitBtn.disabled = true;
+
+    const username = document.getElementById('username').value.trim();
+    let instagram = document.getElementById('instagram').value.trim();
+    const fotoInput = document.getElementById('foto');
+    const file = fotoInput.files && fotoInput.files[0];
+
+    // basic validation
+    if(!username || !instagram){
+      statusEl.textContent = 'Preencha nome e link do Instagram.';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // normalize instagram link
+    if(!instagram.startsWith('http')){
+      instagram = 'https://' + instagram;
+    }
+
+    try {
+      // 1) upload avatar se tiver arquivo
+      let fotoUrl = null;
+      if(file){
+        statusEl.textContent = 'Enviando imagem...';
+        fotoUrl = await uploadAvatar(file);
+      }
+
+      // 2) inserir no banco (slunk_users)
+      statusEl.textContent = 'Criando perfil...';
+
+      const insertObj = {
+        username,
+        instagram,
+        foto: fotoUrl,
+        banned: false
+      };
+
+      const { data, error } = await supabase
+        .from('slunk_users')
+        .insert([insertObj])
+        .select()
+        .single();
+
+      if(error){
+        console.error('Erro ao inserir:', error);
+        statusEl.textContent = 'Erro ao criar perfil.';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      statusEl.textContent = 'Perfil criado com sucesso!';
+      // limpa form
+      createForm.reset();
+      // fecha modal
+      setTimeout(()=> {
+        modal.classList.remove('open');
+        statusEl.textContent = '';
+        submitBtn.disabled = false;
+      }, 800);
+
+      // recarrega lista
+      await loadUsers();
+
+    } catch(err){
+      console.error(err);
+      statusEl.textContent = 'Erro: ' + (err.message || JSON.stringify(err));
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Start
+  loadUsers();
+
+  // Optional: realtime listener to refresh when table changes (requires RLS/public policies)
+  // This listens on the 'slunk_users' table and reloads the list when new rows are inserted.
+  try {
+    supabase.channel('public:slunk_users')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'slunk_users' }, (payload) => {
+        // console.log('Realtime payload', payload);
+        loadUsers();
+      })
+      .subscribe();
+  } catch(e){ /* ignore if realtime not enabled */ }
+
 </script>
 
 </body>
 </html>
+
