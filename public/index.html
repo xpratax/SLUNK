@@ -155,22 +155,29 @@
 <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const supabase = createClient(
+    // 🔥 Supabase global (para evitar erros)
+    window.supabase = createClient(
         "https://vcwccnmyzjxwhxoalcuz.supabase.co",
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjd2Njbm15emp4d2h4b2FsY3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNzA2NDgsImV4cCI6MjA3ODc0NjY0OH0.ppmB5Kaaig9Gs8oLxZHSYy5-sDDSsg0DKo3q89Y4Ofk"
     );
 
     const container = document.getElementById("userContainer");
 
+    // 🔥 CARREGAR CARDS
     async function carregarUsuarios() {
         container.innerHTML = "";
 
-        const { data } = await supabase
+        let { data, error } = await supabase
             .from("slunk_users")
             .select("*")
             .eq("banned", false);
 
-        data?.forEach(u => criarCard(u));
+        if (error) {
+            console.error("Erro ao carregar usuários:", error);
+            return;
+        }
+
+        data.forEach(u => criarCard(u));
     }
 
     function criarCard(u) {
@@ -186,17 +193,12 @@
 
     // MODAL
     const modal = document.getElementById("modal");
-    const btnCriar = document.getElementById("btnCriar");
-    const btnFechar = document.getElementById("btnFechar");
-    const btnEnviar = document.getElementById("btnEnviar");
-    const btnUpdate = document.getElementById("btnUpdate");
+    document.getElementById("btnCriar").onclick = () => modal.style.display = "flex";
+    document.getElementById("btnFechar").onclick = () => modal.style.display = "none";
+    document.getElementById("btnUpdate").onclick = carregarUsuarios;
 
-    btnCriar.onclick = () => modal.style.display = "flex";
-    btnFechar.onclick = () => modal.style.display = "none";
-    btnUpdate.onclick = carregarUsuarios;
-
-    // ENVIAR
-    btnEnviar.onclick = async () => {
+    // ENVIAR FORMULÁRIO
+    document.getElementById("btnEnviar").onclick = async () => {
         const username = document.getElementById("username").value;
         const instagram = document.getElementById("instagram").value;
         const fotoFile = document.getElementById("fotoInput").files[0];
@@ -206,13 +208,11 @@
             return;
         }
 
-        // UPLOAD FOTO
         let fotoUrl = "https://via.placeholder.com/150/8f3fff/ffffff?text=SLUNK";
 
         if (fotoFile) {
             const fileName = `${Date.now()}_${fotoFile.name}`;
-
-            const { data: uploadData, error: uploadError } = await supabase
+            const { error: uploadError } = await supabase
                 .storage
                 .from("slunk-fotos")
                 .upload(fileName, fotoFile);
@@ -224,7 +224,6 @@
             }
         }
 
-        // SALVAR NO BANCO
         await supabase.from("slunk_users").insert({
             username,
             instagram,
@@ -236,20 +235,14 @@
         carregarUsuarios();
     };
 
-    // 🔥 REALTIME — Atualiza automaticamente para TODOS os usuários
+    // 🔥 REALTIME — automático
     supabase
       .channel("slunk-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "slunk_users" },
-        (payload) => {
-            console.log("Realtime:", payload);
-            carregarUsuarios();
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "slunk_users" }, () => {
+          carregarUsuarios();
+      })
       .subscribe();
 
-    // Carrega lista inicial
     carregarUsuarios();
 </script>
 
