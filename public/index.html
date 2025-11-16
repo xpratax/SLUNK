@@ -202,28 +202,30 @@
         const instagram = document.getElementById("instagram").value;
         const fotoFile = document.getElementById("fotoInput").files[0];
 
-        if (!username || !instagram || !fotoFile) {
-            alert("Preencha tudo!");
-            return;
-        }
+      if (!username || !instagram) {
+    alert("Preencha nome e Instagram!");
+    return;
+}
+
 
         // UPLOAD FOTO
-        const fileName = `${Date.now()}_${fotoFile.name}`;
+      let fotoUrl = "https://via.placeholder.com/150/8f3fff/ffffff?text=SLUNK"; // FOTO PADRÃO
 
-        const { data: uploadData, error: uploadError } = await supabase
-            .storage
-            .from("slunk-fotos")
-            .upload(fileName, fotoFile);
+if (fotoFile) {
+    const fileName = `${Date.now()}_${fotoFile.name}`;
 
-        if (uploadError) {
-            alert("Erro no upload da foto!");
-            console.log(uploadError);
-            return;
-        }
+    const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from("slunk-fotos")
+        .upload(fileName, fotoFile);
 
-        const fotoUrl = supabase.storage
+    if (!uploadError) {
+        fotoUrl = supabase.storage
             .from("slunk-fotos")
             .getPublicUrl(fileName).data.publicUrl;
+    }
+}
+
 
         // SALVAR NO BANCO
         await supabase.from("slunk_users").insert({
